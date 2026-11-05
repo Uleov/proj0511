@@ -77,5 +77,6 @@ python main.py data/deficit.json 1
 
 ## Документы проекта
 
+- [Блок-схемы алгоритмов (draw.io)](docs/diagrams.drawio)
 - [Описание алгоритма](docs/algorithms.md)
 - [Протокол проверок программы](docs/test-cases.md)
