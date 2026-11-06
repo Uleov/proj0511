@@ -75,59 +75,40 @@ def process_recipes(stock, recipes):
     result.sort(key=sort_key)
     return result
 
-def print_results(recipes, chosen):
-    print("Доступные блюда:")
+def build_report(recipes, chosen):
+    lines = ["Доступные блюда:"]
     available_found = False
     for r in recipes:
         if r["missing_count"] == 0:
-            print(f"- {r['name']} (id {r['id']})")
+            lines.append(f"- {r['name']} (id {r['id']})")
             available_found = True
     if not available_found:
-        print("Нет блюд, которые можно приготовить.")
+        lines.append("Нет блюд, которые можно приготовить.")
 
-    print()
-    print("Все рецепты:")
+    lines.append("\nВсе рецепты:")
     for r in recipes:
         if r["missing_count"] == 0:
-            print(f"{r['name']} (id {r['id']}): можно готовить")
+            lines.append(f"{r['name']} (id {r['id']}): можно готовить")
         else:
-            print(f"{r['name']} (id {r['id']}): не хватает {r['missing_count']} продуктов")
+            lines.append(f"{r['name']} (id {r['id']}): не хватает {r['missing_count']} продуктов")
 
     if chosen is not None:
-        print()
-        print(f"Список покупок для блюда {chosen['name']}:")
+        lines.append(f"\nСписок покупок для блюда {chosen['name']}:")
         if chosen["missing_count"] == 0:
-            print("Все продукты есть, покупать ничего не надо.")
+            lines.append("Все продукты есть, покупать ничего не надо.")
         else:
             for ing, count in chosen["missing"].items():
-                print(f"{ing}: докупить {count}")
+                lines.append(f"{ing}: докупить {count}")
 
-def save_results(recipes, chosen, output_file):
+    return "\n".join(lines)
+
+def print_results(report_text):
+    print(report_text)
+
+def save_results(report_text, output_file):
     try:
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write("Доступные блюда:\n")
-            available_found = False
-            for r in recipes:
-                if r["missing_count"] == 0:
-                    f.write(f"- {r['name']} (id {r['id']})\n")
-                    available_found = True
-            if not available_found:
-                f.write("Нет блюд, которые можно приготовить.\n")
-
-            f.write("\nВсе рецепты:\n")
-            for r in recipes:
-                if r["missing_count"] == 0:
-                    f.write(f"{r['name']} (id {r['id']}): можно готовить\n")
-                else:
-                    f.write(f"{r['name']} (id {r['id']}): не хватает {r['missing_count']} продуктов\n")
-
-            if chosen is not None:
-                f.write(f"\nСписок покупок для блюда {chosen['name']}:\n")
-                if chosen["missing_count"] == 0:
-                    f.write("Все продукты есть, покупать ничего не надо.\n")
-                else:
-                    for ing, count in chosen["missing"].items():
-                        f.write(f"{ing}: докупить {count}\n")
+            f.write(report_text)
         return True
     except:
         print("Ошибка: не удалось сохранить файл")
@@ -170,10 +151,11 @@ def main():
         else:
             chosen = processed[0]
 
-    print_results(processed, chosen)
+    report = build_report(processed, chosen)
+    print_results(report)
 
     output_file = "result.txt"
-    if save_results(processed, chosen, output_file):
+    if save_results(report, output_file):
         print()
         print(f"Результат сохранен в файл {output_file}")
 
